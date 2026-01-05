@@ -18,19 +18,23 @@ void	polish_lst(t_list **lst)
 	int	j;
 	char	*buff;
 
-	buff = malloc(BUFF_SIZE + 1);
+	buff = malloc(BUFFER_SIZE + 1);
 	clean_node = malloc(sizeof(t_list));
 	if ( buff == NULL || clean_node == NULL)
+	{
+		free(buff); 
+		free(clean_node);
 		return ;
+	}
 	last_node = ft_lstlast(*lst);
 	i = 0;
 	j = 0;
-	while (last_node->str_buff[i] != '\n'
-		&& last_node->str_buff[i] != '\0')
+	while (last_node->str_buff[i] != '\n' && last_node->str_buff[i])
 		++i;
-	while (last_node->str_buff[i] != '\0'
-		&& last_node->str_buff[++i])
-		buff[j++] = last_node->str_buff[i];
+	if (last_node->str_buff[i] == '\n')
+		i++;
+	while (last_node->str_buff[i])
+		buff[j++] = last_node->str_buff[i++];
 	buff[j] = '\0';
 	clean_node->str_buff = buff;
 	clean_node->next = NULL;
@@ -108,7 +112,7 @@ int	found_nl(t_list *lst)
 	while (lst)
 	{
 		i = 0;
-		while (lst ->str_buff[i] && i < BUFF_SIZE )
+		while (lst ->str_buff[i] && i < BUFFER_SIZE )
 		{
 			if (lst->str_buff[i] == '\n')
 				return (1);
@@ -143,13 +147,18 @@ void	create_lst(t_list **lst, int fd)
 
 	while (!found_nl(*lst))
 	{
-		buff = malloc (BUFF_SIZE + 1);
+		buff = malloc (BUFFER_SIZE + 1);
 		if (buff == NULL)
 			return ;
-		chars_read = read (fd , buff, BUFF_SIZE);
-		if (!chars_read)
+		chars_read = read (fd , buff, BUFFER_SIZE);
+		if (!chars_read)// Handles both EOF (0) and Error (-1)
 		{
 			free (buff);
+			if (chars_read == -1) 
+			{
+				*lst = NULL;
+			}
+			return ;
 			return ;
 		}
 		buff[chars_read] = '\0';
@@ -162,7 +171,7 @@ char	*get_next_line(int fd)
 	char	*next_line;
 
 	//lst = NULL;
-	if (fd < 0 || BUFF_SIZE <= 0 || read (fd,&next_line, 0) < 0 )
+	if (fd < 0 || BUFFER_SIZE <= 0 || read (fd,&next_line, 0) < 0 )
 		return (NULL);
 	create_lst(&lst, fd);
 	if (lst == NULL)
