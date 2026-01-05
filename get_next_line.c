@@ -10,19 +10,20 @@
 /*                                                                            */
 /* ************************************************************************** */
 #include "get_next_line.h"
+
 void	polish_lst(t_list **lst)
 {
 	t_list	*last_node;
 	t_list	*clean_node;
-	int	i;
-	int	j;
+	int		i;
+	int		j;
 	char	*buff;
 
 	buff = malloc(BUFFER_SIZE + 1);
 	clean_node = malloc(sizeof(t_list));
-	if ( buff == NULL || clean_node == NULL)
+	if (buff == NULL || clean_node == NULL)
 	{
-		free(buff); 
+		free(buff);
 		free(clean_node);
 		return ;
 	}
@@ -40,10 +41,10 @@ void	polish_lst(t_list **lst)
 	clean_node->next = NULL;
 	ft_dealloc(lst, clean_node, buff);
 }
-	
+
 void	copy_str(t_list *lst, char *str)
 {
-	int 	i;
+	int	i;
 	int	j;
 
 	if (lst == NULL)
@@ -56,20 +57,22 @@ void	copy_str(t_list *lst, char *str)
 		{
 			if (lst->str_buff[i] == '\n')
 			{
-				str[j++] ='\n';
-				str[j]='\0';
+				str[j++] = '\n';
+				str[j] = '\0';
 				return ;
 			}
 			str[j++] = lst->str_buff[i++];
 		}
-		lst=lst->next;
+		lst = lst->next;
 	}
 	str[j] = '\0';
 }
+
 int	len_to_nl(t_list *lst)
 {
 	int	i;
 	int	len;
+
 	if (lst == NULL)
 		return (0);
 	len = 0;
@@ -78,7 +81,7 @@ int	len_to_nl(t_list *lst)
 		i = 0;
 		while (lst->str_buff[i])
 		{
-			if (lst->str_buff[i] =='\n')
+			if (lst->str_buff[i] == '\n')
 			{
 				len++;
 				return (len);
@@ -86,14 +89,16 @@ int	len_to_nl(t_list *lst)
 			i++;
 			len++;
 		}
-		lst=lst->next;
+		lst = lst->next;
 	}
-	return(len);
+	return (len);
 }
+
 char	*get_line(t_list *lst)
 {
-	int	len;
+	int		len;
 	char	*next_str;
+
 	if (lst == NULL)
 		return (NULL);
 	len = len_to_nl(lst);
@@ -103,6 +108,7 @@ char	*get_line(t_list *lst)
 	copy_str(lst, next_str);
 	return (next_str);
 }
+
 int	found_nl(t_list *lst)
 {
 	int	i;
@@ -112,16 +118,17 @@ int	found_nl(t_list *lst)
 	while (lst)
 	{
 		i = 0;
-		while (lst ->str_buff[i] && i < BUFFER_SIZE )
+		while (lst->str_buff[i] && i < BUFFER_SIZE)
 		{
 			if (lst->str_buff[i] == '\n')
 				return (1);
 			i++;
 		}
-		lst =lst->next;	
+		lst = lst->next;
 	}
 	return (0);
 }
+
 void	append(t_list **lst, char *buff)
 {
 	t_list	*new_node;
@@ -138,45 +145,43 @@ void	append(t_list **lst, char *buff)
 		return ;
 	}
 	last = ft_lstlast(*lst);
-	last -> next = new_node;
-}	
+	last->next = new_node;
+}
+
 void	create_lst(t_list **lst, int fd)
 {
-	int	chars_read;
+	int		chars_read;
 	char	*buff;
 
 	while (!found_nl(*lst))
 	{
-		buff = malloc (BUFFER_SIZE + 1);
+		buff = malloc(BUFFER_SIZE + 1);
 		if (buff == NULL)
 			return ;
-		chars_read = read (fd , buff, BUFFER_SIZE);
-		if (!chars_read)// Handles both EOF (0) and Error (-1)
+		chars_read = read(fd, buff, BUFFER_SIZE);
+		if (chars_read <= 0)
 		{
-			free (buff);
-			if (chars_read == -1) 
-			{
+			free(buff);
+			if (chars_read == -1)
 				*lst = NULL;
-			}
-			return ;
 			return ;
 		}
 		buff[chars_read] = '\0';
-		append (lst, buff);
+		append(lst, buff);
 	}
 }
+
 char	*get_next_line(int fd)
 {
 	static t_list	*lst;
-	char	*next_line;
+	char			*next_line;
 
-	//lst = NULL;
-	if (fd < 0 || BUFFER_SIZE <= 0 || read (fd,&next_line, 0) < 0 )
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, &next_line, 0) < 0)
 		return (NULL);
 	create_lst(&lst, fd);
 	if (lst == NULL)
 		return (NULL);
-	next_line=get_line(lst);
+	next_line = get_line(lst);
 	polish_lst(&lst);
-	return(next_line);
+	return (next_line);
 }
