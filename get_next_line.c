@@ -11,6 +11,32 @@
 /* ************************************************************************** */
 #include "get_next_line.h"
 
+void	copy_str(t_list *lst, char *str)
+{
+	int	i;
+	int	j;
+
+	if (lst == NULL)
+		return ;
+	j = 0;
+	while (lst)
+	{
+		i = 0;
+		while (lst->str_buff[i])
+		{
+			if (lst->str_buff[i] == '\n')
+			{
+				str[j++] = '\n';
+				str[j] = '\0';
+				return ;
+			}
+			str[j++] = lst->str_buff[i++];
+		}
+		lst = lst->next;
+	}
+	str[j] = '\0';
+}
+
 void	polish_lst(t_list **lst)
 {
 	t_list	*last_node;
@@ -40,93 +66,6 @@ void	polish_lst(t_list **lst)
 	clean_node->str_buff = buff;
 	clean_node->next = NULL;
 	ft_dealloc(lst, clean_node, buff);
-}
-
-void	copy_str(t_list *lst, char *str)
-{
-	int	i;
-	int	j;
-
-	if (lst == NULL)
-		return ;
-	j = 0;
-	while (lst)
-	{
-		i = 0;
-		while (lst->str_buff[i])
-		{
-			if (lst->str_buff[i] == '\n')
-			{
-				str[j++] = '\n';
-				str[j] = '\0';
-				return ;
-			}
-			str[j++] = lst->str_buff[i++];
-		}
-		lst = lst->next;
-	}
-	str[j] = '\0';
-}
-
-int	len_to_nl(t_list *lst)
-{
-	int	i;
-	int	len;
-
-	if (lst == NULL)
-		return (0);
-	len = 0;
-	while (lst)
-	{
-		i = 0;
-		while (lst->str_buff[i])
-		{
-			if (lst->str_buff[i] == '\n')
-			{
-				len++;
-				return (len);
-			}
-			i++;
-			len++;
-		}
-		lst = lst->next;
-	}
-	return (len);
-}
-
-char	*get_line(t_list *lst)
-{
-	int		len;
-	char	*next_str;
-
-	if (lst == NULL)
-		return (NULL);
-	len = len_to_nl(lst);
-	next_str = malloc(len + 1);
-	if (next_str == NULL)
-		return (NULL);
-	copy_str(lst, next_str);
-	return (next_str);
-}
-
-int	found_nl(t_list *lst)
-{
-	int	i;
-
-	if (lst == NULL)
-		return (0);
-	while (lst)
-	{
-		i = 0;
-		while (lst->str_buff[i] && i < BUFFER_SIZE)
-		{
-			if (lst->str_buff[i] == '\n')
-				return (1);
-			i++;
-		}
-		lst = lst->next;
-	}
-	return (0);
 }
 
 void	append(t_list **lst, char *buff)
@@ -173,8 +112,8 @@ void	create_lst(t_list **lst, int fd)
 
 char	*get_next_line(int fd)
 {
-	static t_list	*lst;
-	char			*next_line;
+	static t_list *lst;
+	char *next_line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, &next_line, 0) < 0)
 		return (NULL);
